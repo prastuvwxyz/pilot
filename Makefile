@@ -2,7 +2,9 @@
 
 BINARY=pilot
 DEPLOY_HOST=claw
-DEPLOY_PATH=~/workspaces/prastuvwxyz/pilot
+DEPLOY_USER=openclaw
+DEPLOY_PATH=/home/openclaw/workspaces/prastuvwxyz/pilot
+OPENCLAW_UID=$(shell ssh $(DEPLOY_HOST) "id -u $(DEPLOY_USER)")
 
 help:
 	@echo "Available commands:"
@@ -57,7 +59,7 @@ test:
 	go test ./... -v
 
 deploy: build-linux
-	scp $(BINARY) openclaw@$(DEPLOY_HOST):$(DEPLOY_PATH)/$(BINARY)
-	scp web/static/output.css openclaw@$(DEPLOY_HOST):$(DEPLOY_PATH)/web/static/output.css
-	ssh $(DEPLOY_HOST) "systemctl --user restart pilot"
-	@echo "✅ deployed to $(DEPLOY_HOST)"
+	scp $(BINARY) $(DEPLOY_HOST):$(DEPLOY_PATH)/$(BINARY)
+	scp web/static/output.css $(DEPLOY_HOST):$(DEPLOY_PATH)/web/static/output.css
+	ssh $(DEPLOY_HOST) "sudo XDG_RUNTIME_DIR=/run/user/$(OPENCLAW_UID) -u $(DEPLOY_USER) systemctl --user restart pilot"
+	@echo "✅ deployed to $(DEPLOY_HOST) as $(DEPLOY_USER)"
