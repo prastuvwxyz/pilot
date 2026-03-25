@@ -4,12 +4,12 @@ After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/openclaw/pilot
-ExecStart=/home/openclaw/pilot/pilot
+WorkingDirectory=/home/openclaw/workspaces/prastuvwxyz/pilot
+ExecStart=/home/openclaw/workspaces/prastuvwxyz/pilot/pilot
 Restart=always
 RestartSec=5
 Environment=ENV=production
-EnvironmentFile=/home/openclaw/pilot/.env
+EnvironmentFile=/home/openclaw/workspaces/prastuvwxyz/pilot/.env
 
 # PATH must include openclaw
 Environment=PATH=/home/openclaw/.nvm/versions/node/v24.14.0/bin:/usr/local/bin:/usr/bin:/bin
