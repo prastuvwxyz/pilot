@@ -1,0 +1,88 @@
+package pages
+
+import (
+	"fmt"
+	"github.com/prastuvwxyz/pilot/internal/store"
+	"github.com/prastuvwxyz/pilot/web/templates/components"
+	"github.com/prastuvwxyz/pilot/web/templates/layouts"
+)
+
+templ Kanban(board map[string][]store.TaskCard) {
+	@layouts.Base("Kanban") {
+		<div class="flex items-center justify-between mb-6">
+			<h1 class="text-2xl font-bold">Kanban Board</h1>
+			<button
+				class="btn btn-primary btn-sm"
+				onclick="document.getElementById('new-task-modal').showModal()"
+			>
+				+ New Task
+			</button>
+		</div>
+		<!-- Kanban columns -->
+		<div class="overflow-x-auto">
+			<div class="flex gap-4 min-w-max pb-4">
+				for _, col := range store.Columns {
+					<div class="w-64 flex-shrink-0">
+						<div class="flex items-center justify-between mb-2">
+							<h3 class="font-semibold capitalize text-sm">{ col }</h3>
+							<span class="badge badge-sm badge-ghost">{ fmt.Sprintf("%d", len(board[col])) }</span>
+						</div>
+						<div class="min-h-32 bg-base-200 rounded-box p-2" id={ "col-" + col }>
+							for _, task := range board[col] {
+								@components.TaskCard(task)
+							}
+						</div>
+					</div>
+				}
+			</div>
+		</div>
+		<!-- New Task Modal -->
+		<dialog id="new-task-modal" class="modal">
+			<div class="modal-box">
+				<h3 class="font-bold text-lg mb-4">New Task</h3>
+				<form method="POST" action="/tasks">
+					<div class="form-control mb-3">
+						<label class="label"><span class="label-text">Slug (e.g. TASK-002)</span></label>
+						<input type="text" name="slug" class="input input-bordered" placeholder="TASK-002" required/>
+					</div>
+					<div class="form-control mb-3">
+						<label class="label"><span class="label-text">Title</span></label>
+						<input type="text" name="title" class="input input-bordered" required/>
+					</div>
+					<div class="form-control mb-3">
+						<label class="label"><span class="label-text">Project</span></label>
+						<input type="text" name="project" class="input input-bordered" placeholder="prastya.com"/>
+					</div>
+					<div class="grid grid-cols-2 gap-3 mb-3">
+						<div class="form-control">
+							<label class="label"><span class="label-text">Type</span></label>
+							<select name="type" class="select select-bordered">
+								<option value="feature">feature</option>
+								<option value="bug">bug</option>
+								<option value="chore">chore</option>
+								<option value="spike">spike</option>
+							</select>
+						</div>
+						<div class="form-control">
+							<label class="label"><span class="label-text">Priority</span></label>
+							<select name="priority" class="select select-bordered">
+								<option value="medium">medium</option>
+								<option value="high">high</option>
+								<option value="low">low</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-control mb-4">
+						<label class="label"><span class="label-text">Context</span></label>
+						<textarea name="context" class="textarea textarea-bordered" rows="3" placeholder="What needs to be done and why..."></textarea>
+					</div>
+					<div class="modal-action">
+						<button type="button" class="btn" onclick="document.getElementById('new-task-modal').close()">Cancel</button>
+						<button type="submit" class="btn btn-primary">Create Task</button>
+					</div>
+				</form>
+			</div>
+			<form method="dialog" class="modal-backdrop"><button>close</button></form>
+		</dialog>
+	}
+}

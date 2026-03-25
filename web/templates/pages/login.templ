@@ -1,0 +1,43 @@
+package pages
+
+templ Login(errMsg, username string) {
+	<!DOCTYPE html>
+	<html lang="en" data-theme="light">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>Login — Pilot</title>
+			<link rel="stylesheet" href="/static/output.css"/>
+		</head>
+		<body class="min-h-screen bg-base-200 flex items-center justify-center">
+			<div class="card w-96 bg-base-100 shadow-xl">
+				<div class="card-body">
+					<h2 class="card-title text-2xl justify-center mb-4">Pilot</h2>
+					if errMsg != "" {
+						<div class="alert alert-error mb-4">
+							<span>{ errMsg }</span>
+						</div>
+					}
+					<form method="POST" action="/login" class="space-y-4">
+						<div class="form-control">
+							<label class="label"><span class="label-text">Username</span></label>
+							<input
+								type="text"
+								name="username"
+								value={ username }
+								class="input input-bordered"
+								required
+								autofocus
+							/>
+						</div>
+						<div class="form-control">
+							<label class="label"><span class="label-text">Password</span></label>
+							<input type="password" name="password" class="input input-bordered" required/>
+						</div>
+						<button type="submit" class="btn btn-primary w-full">Login</button>
+					</form>
+				</div>
+			</div>
+		</body>
+	</html>
+}

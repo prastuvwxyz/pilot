@@ -1,0 +1,50 @@
+package pages
+
+import (
+	"fmt"
+	"github.com/prastuvwxyz/pilot/internal/store"
+	"github.com/prastuvwxyz/pilot/web/templates/layouts"
+)
+
+func countTasks(board map[string][]store.TaskCard, col string) string {
+	return fmt.Sprintf("%d", len(board[col]))
+}
+
+templ Dashboard(board map[string][]store.TaskCard) {
+	@layouts.Base("Dashboard") {
+		<h1 class="text-2xl font-bold mb-6">Dashboard</h1>
+		<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+			<div class="stat bg-base-100 rounded-box shadow-sm">
+				<div class="stat-title">Backlog</div>
+				<div class="stat-value text-2xl">{ countTasks(board, "backlog") }</div>
+			</div>
+			<div class="stat bg-base-100 rounded-box shadow-sm">
+				<div class="stat-title">In Review</div>
+				<div class="stat-value text-2xl">{ countTasks(board, "lead-review") }</div>
+			</div>
+			<div class="stat bg-base-100 rounded-box shadow-sm">
+				<div class="stat-title">In Progress</div>
+				<div class="stat-value text-2xl">{ countTasks(board, "in-progress") }</div>
+			</div>
+			<div class="stat bg-base-100 rounded-box shadow-sm">
+				<div class="stat-title">Done</div>
+				<div class="stat-value text-2xl">{ countTasks(board, "done") }</div>
+			</div>
+		</div>
+		<div class="flex justify-between items-center mb-4">
+			<h2 class="text-lg font-semibold">Quick Actions</h2>
+			<a href="/kanban" class="btn btn-primary btn-sm">View Kanban</a>
+		</div>
+		if len(board["lead-review"]) > 0 {
+			<div class="alert alert-info">
+				<span>{ countTasks(board, "lead-review") } RFC(s) waiting for approval</span>
+				<a href="/kanban" class="btn btn-xs">Review</a>
+			</div>
+		}
+		if len(board["blocked"]) > 0 {
+			<div class="alert alert-warning mt-2">
+				<span>{ countTasks(board, "blocked") } task(s) blocked — needs attention</span>
+			</div>
+		}
+	}
+}

@@ -1,0 +1,44 @@
+package components
+
+import "github.com/prastuvwxyz/pilot/internal/store"
+
+func priorityBadge(priority string) string {
+	switch priority {
+	case "high":
+		return "badge-error"
+	case "medium":
+		return "badge-warning"
+	default:
+		return "badge-ghost"
+	}
+}
+
+templ TaskCard(task store.TaskCard) {
+	<div class="card bg-base-100 shadow-sm border border-base-300 mb-2">
+		<div class="card-body p-3">
+			<div class="flex items-start justify-between gap-2">
+				<div class="flex-1 min-w-0">
+					<p class="text-xs text-base-content/50 font-mono">{ task.Slug }</p>
+					<h3 class="font-medium text-sm leading-snug mt-0.5">{ task.Title }</h3>
+				</div>
+				<span class={ "badge badge-sm " + priorityBadge(task.Priority) }>{ task.Priority }</span>
+			</div>
+			if task.Project != "" {
+				<p class="text-xs text-base-content/60 mt-1">{ task.Project }</p>
+			}
+			<div class="card-actions justify-end mt-2">
+				if task.Column == "lead-review" {
+					<button
+						class="btn btn-xs btn-success"
+						hx-put={ "/tasks/" + task.Slug + "/approve" }
+						hx-confirm="Approve RFC and send subtasks to impl-queue?"
+						hx-target="closest .card"
+						hx-swap="outerHTML"
+					>
+						Approve RFC
+					</button>
+				}
+			</div>
+		</div>
+	</div>
+}
