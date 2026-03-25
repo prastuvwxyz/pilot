@@ -1,0 +1,14 @@
+# Build
+pilot
+dist/
+
+# Config
+.env
+config/config.local.yaml
+
+# Generated
+web/static/output.css
+**/*_templ.go
+
+# Dev
+tmp/
