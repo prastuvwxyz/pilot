@@ -1,0 +1,12 @@
+env: development
+
+server:
+  host: ""
+  port: 8080
+  shutdown_timeout: 10s
+
+pilot:
+  jwt_expiry: 24h
+
+engineering_tasks_path: /home/openclaw/pras-memory/engineering-tasks
+pras_memory_path: /home/openclaw/pras-memory
