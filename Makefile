@@ -1,6 +1,8 @@
-.PHONY: help deps install-tools build run dev templ-generate templ-watch css-build css-watch deploy
+.PHONY: help deps install-tools build build-linux run dev templ-generate templ-watch css-build css-watch deploy
 
 BINARY=pilot
+DEPLOY_HOST=claw
+DEPLOY_PATH=~/workspaces/prastuvwxyz/pilot
 
 help:
 	@echo "Available commands:"
@@ -13,7 +15,8 @@ help:
 	@echo "  make css-build       - Build TailwindCSS"
 	@echo "  make css-watch       - Watch TailwindCSS"
 	@echo "  make test            - Run tests"
-	@echo "  make deploy          - Build + scp + restart on server"
+	@echo "  make build-linux     - Cross-compile for Linux amd64"
+	@echo "  make deploy          - Build linux binary + scp + restart on server"
 
 deps:
 	go mod download && go mod tidy
@@ -28,6 +31,9 @@ install-tools:
 
 build: templ-generate css-build
 	go build -o $(BINARY) ./cmd/web/
+
+build-linux: templ-generate css-build
+	GOOS=linux GOARCH=amd64 go build -o $(BINARY) ./cmd/web/
 
 run: build
 	./$(BINARY)
@@ -50,6 +56,8 @@ css-watch:
 test:
 	go test ./... -v
 
-deploy: build
-	scp $(BINARY) openclaw@claw:~/pilot/$(BINARY)
-	ssh claw "systemctl --user restart pilot"
+deploy: build-linux
+	scp $(BINARY) openclaw@$(DEPLOY_HOST):$(DEPLOY_PATH)/$(BINARY)
+	scp web/static/output.css openclaw@$(DEPLOY_HOST):$(DEPLOY_PATH)/web/static/output.css
+	ssh $(DEPLOY_HOST) "systemctl --user restart pilot"
+	@echo "✅ deployed to $(DEPLOY_HOST)"
