@@ -1,0 +1,22 @@
+{
+  "name": "pilot",
+  "version": "1.0.0",
+  "description": "Engineering task board for AI agent automation. A Go web app that manages a kanban board backed by markdown files and auto-triggers AI agents when tasks move through the pipeline.",
+  "main": "tailwind.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@pras.github.com:prastuvwxyz/pilot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.2.2",
+    "daisyui": "^5.5.19",
+    "tailwindcss": "^4.2.2"
+  }
+}

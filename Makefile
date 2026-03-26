@@ -50,10 +50,10 @@ templ-watch:
 	templ generate --watch
 
 css-build:
-	tailwindcss -i web/static/input.css -o web/static/output.css --minify
+	npx tailwindcss -i web/static/input.css -o web/static/output.css --minify
 
 css-watch:
-	tailwindcss -i web/static/input.css -o web/static/output.css --watch
+	npx tailwindcss -i web/static/input.css -o web/static/output.css --watch
 
 test:
 	go test ./... -v

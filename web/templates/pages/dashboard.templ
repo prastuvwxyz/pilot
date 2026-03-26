@@ -11,7 +11,7 @@ func countTasks(board map[string][]store.TaskCard, col string) string {
 }
 
 templ Dashboard(board map[string][]store.TaskCard) {
-	@layouts.Base("Dashboard") {
+	@layouts.Base("Dashboard", "dashboard") {
 		<h1 class="text-2xl font-bold mb-6">Dashboard</h1>
 		<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
 			<div class="stat bg-base-100 rounded-box shadow-sm">

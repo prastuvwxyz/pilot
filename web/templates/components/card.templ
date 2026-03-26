@@ -38,6 +38,15 @@ templ TaskCard(task store.TaskCard) {
 						Approve RFC
 					</button>
 				}
+				<button
+					class="btn btn-xs btn-ghost text-error"
+					hx-delete={ "/tasks/" + task.Slug }
+					hx-confirm={ "Delete " + task.Slug + "?" }
+					hx-target="closest .card"
+					hx-swap="outerHTML"
+				>
+					Delete
+				</button>
 			</div>
 		</div>
 	</div>

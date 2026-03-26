@@ -24,13 +24,13 @@ type TaskCard struct {
 	// Frontmatter fields
 	ID         string   `yaml:"id"`
 	Title      string   `yaml:"title"`
-	Type       string   `yaml:"type"`
-	Priority   string   `yaml:"priority"`
-	Project    string   `yaml:"project"`
-	AssignedTo string   `yaml:"assigned_to"`
-	DependsOn  []string `yaml:"depends_on"`
-	Created    string   `yaml:"created"`
-	Due        string   `yaml:"due"`
+	Type       string   `yaml:"type,omitempty"`
+	Priority   string   `yaml:"priority,omitempty"`
+	Project    string   `yaml:"project,omitempty"`
+	AssignedTo string   `yaml:"assigned_to,omitempty"`
+	DependsOn  []string `yaml:"depends_on,omitempty"`
+	Created    string   `yaml:"created,omitempty"`
+	Due        string   `yaml:"due,omitempty"`
 
 	// Computed fields (not from frontmatter)
 	Slug   string `yaml:"-"` // folder/file name without extension
@@ -181,6 +181,22 @@ func (ts *TaskStore) CreateTask(card TaskCard) error {
 
 	content := fmt.Sprintf("---\n%s---\n\n%s", string(frontmatter), card.Body)
 	return os.WriteFile(path, []byte(content), 0644)
+}
+
+// DeleteTask removes a task from whichever column it's in.
+// Handles both file-based and folder-based tasks.
+func (ts *TaskStore) DeleteTask(slug string) error {
+	for _, col := range Columns {
+		filePath := filepath.Join(ts.basePath, col, slug+".md")
+		if _, err := os.Stat(filePath); err == nil {
+			return os.Remove(filePath)
+		}
+		dirPath := filepath.Join(ts.basePath, col, slug)
+		if _, err := os.Stat(dirPath); err == nil {
+			return os.RemoveAll(dirPath)
+		}
+	}
+	return fmt.Errorf("task %s not found", slug)
 }
 
 // ApproveTask copies subtask files from lead-review/{slug}/subtasks/

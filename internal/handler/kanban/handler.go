@@ -35,6 +35,8 @@ func (h *Handler) CreateTask(c *gin.Context) {
 	project := c.PostForm("project")
 	taskType := c.PostForm("type")
 	priority := c.PostForm("priority")
+	assignedTo := c.PostForm("assigned_to")
+	due := c.PostForm("due")
 	context := c.PostForm("context")
 
 	if slug == "" || title == "" {
@@ -48,14 +50,16 @@ func (h *Handler) CreateTask(c *gin.Context) {
 	}
 
 	card := store.TaskCard{
-		ID:       slug,
-		Slug:     slug,
-		Title:    title,
-		Type:     taskType,
-		Priority: priority,
-		Project:  project,
-		Created:  time.Now().Format("2006-01-02"),
-		Body:     body,
+		ID:         slug,
+		Slug:       slug,
+		Title:      title,
+		Type:       taskType,
+		Priority:   priority,
+		Project:    project,
+		AssignedTo: assignedTo,
+		Due:        due,
+		Created:    time.Now().Format("2006-01-02"),
+		Body:       body,
 	}
 
 	if err := h.tasks.CreateTask(card); err != nil {
@@ -84,6 +88,25 @@ func (h *Handler) ApproveTask(c *gin.Context) {
 	}
 
 	// Return empty card (HTMX replaces card with nothing after approve)
+	c.Status(http.StatusOK)
+}
+
+func (h *Handler) DeleteTask(c *gin.Context) {
+	slug := c.Param("id")
+
+	if err := h.tasks.DeleteTask(slug); err != nil {
+		if os.IsNotExist(err) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "task not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.git.PullCommitPush(fmt.Sprintf("[pilot] delete task: %s", slug)); err != nil {
+		c.Header("X-Git-Error", err.Error())
+	}
+
 	c.Status(http.StatusOK)
 }
 

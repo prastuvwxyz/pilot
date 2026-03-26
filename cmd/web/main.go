@@ -75,6 +75,7 @@ func main() {
 		protected.GET("/dashboard", dashboardHandler.Show)
 		protected.GET("/kanban", kanbanHandler.ShowKanban)
 		protected.POST("/tasks", kanbanHandler.CreateTask)
+		protected.DELETE("/tasks/:id", kanbanHandler.DeleteTask)
 		protected.PUT("/tasks/:id/approve", kanbanHandler.ApproveTask)
 		protected.PUT("/tasks/:id/status", kanbanHandler.MoveTask)
 	}

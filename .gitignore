@@ -12,3 +12,6 @@ web/static/output.css
 
 # Dev
 tmp/
+
+# Node
+node_modules/

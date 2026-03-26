@@ -8,7 +8,7 @@ import (
 )
 
 templ Kanban(board map[string][]store.TaskCard) {
-	@layouts.Base("Kanban") {
+	@layouts.Base("Kanban", "kanban") {
 		<div class="flex items-center justify-between mb-6">
 			<h1 class="text-2xl font-bold">Kanban Board</h1>
 			<button
@@ -38,25 +38,23 @@ templ Kanban(board map[string][]store.TaskCard) {
 		</div>
 		<!-- New Task Modal -->
 		<dialog id="new-task-modal" class="modal">
-			<div class="modal-box">
+			<div class="modal-box max-w-lg">
 				<h3 class="font-bold text-lg mb-4">New Task</h3>
-				<form method="POST" action="/tasks">
-					<div class="form-control mb-3">
-						<label class="label"><span class="label-text">Slug (e.g. TASK-002)</span></label>
-						<input type="text" name="slug" class="input input-bordered" placeholder="TASK-002" required/>
-					</div>
-					<div class="form-control mb-3">
-						<label class="label"><span class="label-text">Title</span></label>
-						<input type="text" name="title" class="input input-bordered" required/>
-					</div>
-					<div class="form-control mb-3">
-						<label class="label"><span class="label-text">Project</span></label>
-						<input type="text" name="project" class="input input-bordered" placeholder="prastya.com"/>
-					</div>
-					<div class="grid grid-cols-2 gap-3 mb-3">
+				<form method="POST" action="/tasks" class="flex flex-col gap-3">
+					<div class="grid grid-cols-3 gap-3">
 						<div class="form-control">
-							<label class="label"><span class="label-text">Type</span></label>
-							<select name="type" class="select select-bordered">
+							<label class="label py-1"><span class="label-text">Task ID</span></label>
+							<input type="text" name="slug" class="input input-bordered input-sm" placeholder="TASK-010" required/>
+						</div>
+						<div class="form-control col-span-2">
+							<label class="label py-1"><span class="label-text">Title</span></label>
+							<input type="text" name="title" class="input input-bordered input-sm" placeholder="What needs to be done" required/>
+						</div>
+					</div>
+					<div class="grid grid-cols-3 gap-3">
+						<div class="form-control">
+							<label class="label py-1"><span class="label-text">Type</span></label>
+							<select name="type" class="select select-bordered select-sm">
 								<option value="feature">feature</option>
 								<option value="bug">bug</option>
 								<option value="chore">chore</option>
@@ -64,21 +62,30 @@ templ Kanban(board map[string][]store.TaskCard) {
 							</select>
 						</div>
 						<div class="form-control">
-							<label class="label"><span class="label-text">Priority</span></label>
-							<select name="priority" class="select select-bordered">
+							<label class="label py-1"><span class="label-text">Priority</span></label>
+							<select name="priority" class="select select-bordered select-sm">
 								<option value="medium">medium</option>
 								<option value="high">high</option>
 								<option value="low">low</option>
 							</select>
 						</div>
+						<div class="form-control">
+							<label class="label py-1"><span class="label-text">Project</span></label>
+							<input type="text" name="project" class="input input-bordered input-sm" placeholder="prastya.com"/>
+						</div>
 					</div>
-					<div class="form-control mb-4">
-						<label class="label"><span class="label-text">Context</span></label>
-						<textarea name="context" class="textarea textarea-bordered" rows="3" placeholder="What needs to be done and why..."></textarea>
+					<div class="form-control">
+						<label class="label py-1"><span class="label-text">Context</span></label>
+						<textarea
+							name="context"
+							class="textarea textarea-bordered textarea-sm"
+							rows="3"
+							placeholder="Why this task exists, any relevant constraints..."
+						></textarea>
 					</div>
-					<div class="modal-action">
-						<button type="button" class="btn" onclick="document.getElementById('new-task-modal').close()">Cancel</button>
-						<button type="submit" class="btn btn-primary">Create Task</button>
+					<div class="modal-action mt-2">
+						<button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('new-task-modal').close()">Cancel</button>
+						<button type="submit" class="btn btn-primary btn-sm">Create Task</button>
 					</div>
 				</form>
 			</div>
