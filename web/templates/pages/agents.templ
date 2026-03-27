@@ -1,0 +1,38 @@
+package pages
+
+import (
+	"github.com/prastuvwxyz/pilot/internal/store"
+	"github.com/prastuvwxyz/pilot/web/templates/layouts"
+)
+
+templ AgentsList(agents []store.AgentInfo) {
+	@layouts.Base("Agents", "agents") {
+		<h1 class="text-2xl font-bold mb-6">Agents</h1>
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+			for _, agent := range agents {
+				<a href={ templ.SafeURL("/agents/" + agent.ID) } class="card bg-base-100 border border-base-300 shadow-sm hover:border-primary hover:shadow-md transition-all cursor-pointer">
+					<div class="card-body p-4">
+						<div class="flex items-center gap-3">
+							<div class="w-10 h-10 rounded-full bg-base-200 flex items-center justify-center text-xl shrink-0">
+								if agent.Emoji != "" {
+									{ agent.Emoji }
+								} else {
+									🤖
+								}
+							</div>
+							<div class="min-w-0">
+								<h2 class="font-semibold text-sm leading-tight">{ agent.Name }</h2>
+								if agent.Role != "" {
+									<p class="text-xs text-base-content/50 mt-0.5 truncate">{ agent.Role }</p>
+								}
+							</div>
+							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 ml-auto text-base-content/20 shrink-0">
+								<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path>
+							</svg>
+						</div>
+					</div>
+				</a>
+			}
+		</div>
+	}
+}

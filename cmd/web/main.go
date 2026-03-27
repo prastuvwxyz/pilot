@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/prastuvwxyz/pilot/internal/config"
+	"github.com/prastuvwxyz/pilot/internal/handler/agents"
 	"github.com/prastuvwxyz/pilot/internal/handler/auth"
 	"github.com/prastuvwxyz/pilot/internal/handler/dashboard"
 	"github.com/prastuvwxyz/pilot/internal/handler/health"
@@ -45,6 +46,7 @@ func main() {
 	dashboardHandler := dashboard.NewHandler(taskStore, cfg.Paths.PrasMemory)
 	kanbanHandler := kanban.NewHandler(taskStore, gitStore)
 	healthHandler := health.NewHandler()
+	agentsHandler := agents.NewHandler(cfg.Paths.PrasMemory)
 
 	// Router
 	if cfg.IsProduction() {
@@ -80,6 +82,10 @@ func main() {
 		protected.DELETE("/tasks/:id", kanbanHandler.DeleteTask)
 		protected.PUT("/tasks/:id/approve", kanbanHandler.ApproveTask)
 		protected.PUT("/tasks/:id/status", kanbanHandler.MoveTask)
+		protected.GET("/agents", agentsHandler.List)
+		protected.GET("/agents/:id", agentsHandler.Detail)
+		protected.GET("/agents/:id/files/:filename", agentsHandler.GetFile)
+		protected.POST("/agents/:id/files/:filename", agentsHandler.SaveFile)
 	}
 
 	// File watcher (goroutine)

@@ -7,12 +7,23 @@ import (
 	"strings"
 )
 
+// Standard agent files shown in the file browser (in display order).
+var agentFileOrder = []string{
+	"IDENTITY.md",
+	"AGENTS.md",
+	"SOUL.md",
+	"TOOLS.md",
+	"HEARTBEAT.md",
+	"USER.md",
+}
+
 type AgentInfo struct {
 	ID      string // folder name, or "main" for root agent
 	Name    string
 	Role    string
 	Emoji   string
 	Tagline string
+	Avatar  string // path or "_none_"
 }
 
 var (
@@ -49,9 +60,47 @@ func parseIdentity(path, id string) (AgentInfo, error) {
 			info.Emoji = val
 		case "tagline":
 			info.Tagline = val
+		case "avatar":
+			info.Avatar = val
 		}
 	}
 	return info, nil
+}
+
+// agentDir returns the filesystem directory for a given agent ID.
+func agentDir(prasMemoryPath, id string) string {
+	if id == "main" {
+		return prasMemoryPath
+	}
+	return filepath.Join(prasMemoryPath, "agents", id)
+}
+
+// AgentFiles returns the ordered list of standard .md files that exist for an agent.
+func AgentFiles(prasMemoryPath, id string) []string {
+	dir := agentDir(prasMemoryPath, id)
+	var files []string
+	for _, name := range agentFileOrder {
+		if _, err := os.Stat(filepath.Join(dir, name)); err == nil {
+			files = append(files, name)
+		}
+	}
+	return files
+}
+
+// ReadAgentFile reads the content of a named file for an agent.
+func ReadAgentFile(prasMemoryPath, id, filename string) (string, error) {
+	path := filepath.Join(agentDir(prasMemoryPath, id), filepath.Base(filename))
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
+// WriteAgentFile overwrites the content of a named file for an agent.
+func WriteAgentFile(prasMemoryPath, id, filename, content string) error {
+	path := filepath.Join(agentDir(prasMemoryPath, id), filepath.Base(filename))
+	return os.WriteFile(path, []byte(content), 0644)
 }
 
 // LoadAgents reads the main agent (root IDENTITY.md) and all sub-agents
@@ -86,4 +135,15 @@ func LoadAgents(prasMemoryPath string) ([]AgentInfo, error) {
 	}
 
 	return agents, nil
+}
+
+// GetAgent returns a single AgentInfo by ID.
+func GetAgent(prasMemoryPath, id string) (AgentInfo, error) {
+	var identityPath string
+	if id == "main" {
+		identityPath = filepath.Join(prasMemoryPath, "IDENTITY.md")
+	} else {
+		identityPath = filepath.Join(prasMemoryPath, "agents", id, "IDENTITY.md")
+	}
+	return parseIdentity(identityPath, id)
 }

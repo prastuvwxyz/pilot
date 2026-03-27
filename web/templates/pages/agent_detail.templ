@@ -1,0 +1,115 @@
+package pages
+
+import (
+	"github.com/prastuvwxyz/pilot/internal/store"
+	"github.com/prastuvwxyz/pilot/web/templates/layouts"
+)
+
+func fileLabel(name string) string {
+	switch name {
+	case "IDENTITY.md":
+		return "Identity"
+	case "AGENTS.md":
+		return "Behavior"
+	case "SOUL.md":
+		return "Values"
+	case "TOOLS.md":
+		return "Tools"
+	case "HEARTBEAT.md":
+		return "Health"
+	case "USER.md":
+		return "User"
+	default:
+		return name
+	}
+}
+
+templ AgentDetail(agent store.AgentInfo, files []string, activeFile string, activeContent string) {
+	@layouts.Base(agent.Name, "agents") {
+		<!-- Breadcrumb -->
+		<div class="text-sm breadcrumbs mb-4 text-base-content/50">
+			<ul>
+				<li><a href="/agents" class="hover:text-base-content">Agents</a></li>
+				<li class="text-base-content font-medium">
+					if agent.Emoji != "" {
+						{ agent.Emoji + " " }
+					}
+					{ agent.Name }
+				</li>
+			</ul>
+		</div>
+		<!-- Compact profile strip -->
+		<div class="flex items-center gap-4 mb-6 px-1">
+			<div class="w-10 h-10 rounded-full bg-base-200 flex items-center justify-center text-xl shrink-0 border border-base-300">
+				if agent.Emoji != "" {
+					{ agent.Emoji }
+				} else {
+					🤖
+				}
+			</div>
+			<div class="min-w-0">
+				<h1 class="text-lg font-bold leading-tight">{ agent.Name }</h1>
+				if agent.Role != "" {
+					<p class="text-xs text-base-content/50">{ agent.Role }</p>
+				}
+			</div>
+			if agent.Tagline != "" {
+				<p class="ml-auto text-xs text-base-content/35 italic hidden md:block">{ agent.Tagline }</p>
+			}
+		</div>
+		<!-- File tabs + editor -->
+		<div x-data={ "{ active: '" + activeFile + "', saved: false }" }>
+			<!-- Tabs -->
+			<div class="flex gap-1 border-b border-base-300">
+				for _, f := range files {
+					<button
+						type="button"
+						class="px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors"
+						x-bind:class={ "active === '" + f + "' ? 'border-primary text-primary' : 'border-transparent text-base-content/50 hover:text-base-content'" }
+						x-on:click={ "active = '" + f + "'" }
+						hx-get={ "/agents/" + agent.ID + "/files/" + f }
+						hx-target="#file-content-panel"
+						hx-swap="innerHTML"
+					>
+						{ fileLabel(f) }
+					</button>
+				}
+			</div>
+			<!-- Editor panel -->
+			<div id="file-content-panel">
+				@AgentFileContent(agent.ID, activeFile, activeContent)
+			</div>
+		</div>
+	}
+}
+
+templ AgentFileContent(agentID string, filename string, content string) {
+	<div class="card bg-base-100 border border-base-300 border-t-0 rounded-tl-none rounded-tr-none shadow-sm">
+		<div class="card-body p-4">
+			<form
+				hx-post={ "/agents/" + agentID + "/files/" + filename }
+				hx-target="#file-content-panel"
+				hx-swap="innerHTML"
+				hx-on::after-request="saved = true; setTimeout(() => saved = false, 2000)"
+			>
+				<textarea
+					name="content"
+					class="textarea w-full font-mono text-sm leading-relaxed resize-none focus:outline-none bg-transparent"
+					rows="30"
+					spellcheck="false"
+					x-on:keydown.meta.s.prevent="$el.form.requestSubmit()"
+				>{ content }</textarea>
+				<div class="flex items-center justify-end gap-3 mt-2">
+					<span
+						x-show="saved"
+						x-transition:leave="transition ease-in duration-700"
+						x-transition:leave-start="opacity-100"
+						x-transition:leave-end="opacity-0"
+						class="text-xs text-success"
+					>Saved</span>
+					<button type="submit" class="btn btn-primary btn-sm">Save</button>
+				</div>
+			</form>
+		</div>
+	</div>
+}
