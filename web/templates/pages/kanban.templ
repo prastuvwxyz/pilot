@@ -7,6 +7,82 @@ import (
 	"github.com/prastuvwxyz/pilot/web/templates/layouts"
 )
 
+func columnLabel(col string) string {
+	switch col {
+	case "backlog":
+		return "Backlog"
+	case "lead-queue":
+		return "Lead Queue"
+	case "lead-review":
+		return "Lead Review"
+	case "impl-queue":
+		return "Impl Queue"
+	case "in-progress":
+		return "In Progress"
+	case "blocked":
+		return "Blocked"
+	case "done":
+		return "Done"
+	default:
+		return col
+	}
+}
+
+func columnDotClass(col string) string {
+	switch col {
+	case "backlog":
+		return "bg-base-content/30"
+	case "lead-queue":
+		return "bg-secondary"
+	case "lead-review":
+		return "bg-secondary"
+	case "impl-queue":
+		return "bg-info"
+	case "in-progress":
+		return "bg-warning"
+	case "blocked":
+		return "bg-error"
+	case "done":
+		return "bg-success"
+	default:
+		return "bg-base-content/30"
+	}
+}
+
+func columnAgentLabel(col string) string {
+	switch col {
+	case "lead-queue":
+		return "→ Jiwoo picks up"
+	case "lead-review":
+		return "→ Jiwoo reviews"
+	case "impl-queue":
+		return "→ Wasawho executes"
+	default:
+		return ""
+	}
+}
+
+func columnEmptyState(col string) string {
+	switch col {
+	case "backlog":
+		return "No tasks yet — create one above"
+	case "lead-queue":
+		return "Waiting for Jiwoo..."
+	case "lead-review":
+		return "No RFCs pending review"
+	case "impl-queue":
+		return "No subtasks approved yet"
+	case "in-progress":
+		return "Nothing in progress"
+	case "blocked":
+		return "No blockers"
+	case "done":
+		return "Nothing shipped yet"
+	default:
+		return "Empty"
+	}
+}
+
 templ Kanban(board map[string][]store.TaskCard) {
 	@layouts.Base("Kanban", "kanban") {
 		<div class="flex items-center justify-between mb-6">
@@ -19,17 +95,34 @@ templ Kanban(board map[string][]store.TaskCard) {
 			</button>
 		</div>
 		<!-- Kanban columns -->
-		<div class="overflow-x-auto">
-			<div class="flex gap-4 min-w-max pb-4">
+		<div class="overflow-x-scroll pb-3">
+			<div class="flex gap-4 min-w-max min-h-[calc(100vh-6rem)] items-stretch">
 				for _, col := range store.Columns {
-					<div class="w-64 flex-shrink-0">
-						<div class="flex items-center justify-between mb-2">
-							<h3 class="font-semibold capitalize text-sm">{ col }</h3>
-							<span class="badge badge-sm badge-ghost">{ fmt.Sprintf("%d", len(board[col])) }</span>
+					<div class="w-64 flex-shrink-0 flex flex-col">
+						<!-- Column header -->
+						<div class="mb-3">
+							<div class="flex items-center justify-between">
+								<div class="flex items-center gap-2">
+									<span class={ "w-2 h-2 rounded-full shrink-0 " + columnDotClass(col) }></span>
+									<h3 class="font-semibold text-sm">{ columnLabel(col) }</h3>
+								</div>
+								<span class="badge badge-sm badge-ghost">{ fmt.Sprintf("%d", len(board[col])) }</span>
+							</div>
+							<p class={ "text-xs mt-0.5 ml-4", templ.KV("text-base-content/40", columnAgentLabel(col) != ""), templ.KV("invisible", columnAgentLabel(col) == "") }>
+							if columnAgentLabel(col) != "" {
+								{ columnAgentLabel(col) }
+							} else {
+								{ "\u00A0" }
+							}
+						</p>
 						</div>
-						<div class="min-h-32 bg-base-200 rounded-box p-2" id={ "col-" + col }>
+						<!-- Column body -->
+						<div class="flex-1 bg-base-200 rounded-box p-2" id={ "col-" + col }>
 							for _, task := range board[col] {
 								@components.TaskCard(task)
+							}
+							if len(board[col]) == 0 {
+								<p class="text-xs text-base-content/30 text-center py-4 px-2">{ columnEmptyState(col) }</p>
 							}
 						</div>
 					</div>
@@ -39,46 +132,32 @@ templ Kanban(board map[string][]store.TaskCard) {
 		<!-- New Task Modal -->
 		<dialog id="new-task-modal" class="modal">
 			<div class="modal-box max-w-lg">
-				<h3 class="font-bold text-lg mb-4">New Task</h3>
+				<h3 class="font-bold text-lg mb-5">New Task</h3>
 				<form method="POST" action="/tasks" class="flex flex-col gap-3">
-					<div class="grid grid-cols-3 gap-3">
-						<div class="form-control">
-							<label class="label py-1"><span class="label-text">Task ID</span></label>
-							<input type="text" name="slug" class="input input-bordered input-sm" placeholder="TASK-010" required/>
-						</div>
-						<div class="form-control col-span-2">
-							<label class="label py-1"><span class="label-text">Title</span></label>
-							<input type="text" name="title" class="input input-bordered input-sm" placeholder="What needs to be done" required/>
-						</div>
-					</div>
-					<div class="grid grid-cols-3 gap-3">
-						<div class="form-control">
-							<label class="label py-1"><span class="label-text">Type</span></label>
-							<select name="type" class="select select-bordered select-sm">
-								<option value="feature">feature</option>
-								<option value="bug">bug</option>
-								<option value="chore">chore</option>
-								<option value="spike">spike</option>
-							</select>
-						</div>
-						<div class="form-control">
-							<label class="label py-1"><span class="label-text">Priority</span></label>
-							<select name="priority" class="select select-bordered select-sm">
-								<option value="medium">medium</option>
-								<option value="high">high</option>
-								<option value="low">low</option>
-							</select>
-						</div>
-						<div class="form-control">
-							<label class="label py-1"><span class="label-text">Project</span></label>
-							<input type="text" name="project" class="input input-bordered input-sm" placeholder="prastya.com"/>
-						</div>
-					</div>
-					<div class="form-control">
-						<label class="label py-1"><span class="label-text">Context</span></label>
+					<div class="grid grid-cols-[7rem_1fr] items-center gap-x-4 gap-y-3">
+						<label class="label-text font-medium text-right">Title</label>
+						<input type="text" name="title" class="input input-bordered input-sm w-full" placeholder="What needs to be done" required/>
+						<label class="label-text font-medium text-right">Project</label>
+						<input type="text" name="project" class="input input-bordered input-sm w-full" placeholder="prastya.com"/>
+						<label class="label-text font-medium text-right">Type</label>
+						<select name="type" class="select select-bordered select-sm w-full">
+							<option value="feature">feature</option>
+							<option value="bug">bug</option>
+							<option value="chore">chore</option>
+							<option value="spike">spike</option>
+						</select>
+						<label class="label-text font-medium text-right">Priority</label>
+						<select name="priority" class="select select-bordered select-sm w-full">
+							<option value="medium">medium</option>
+							<option value="high">high</option>
+							<option value="low">low</option>
+						</select>
+						<label class="label-text font-medium text-right">Task ID</label>
+						<input type="text" name="slug" class="input input-bordered input-sm font-mono w-full" placeholder="TASK-0000000000001" required/>
+						<label class="label-text font-medium text-right self-start pt-2">Context</label>
 						<textarea
 							name="context"
-							class="textarea textarea-bordered textarea-sm"
+							class="textarea textarea-bordered textarea-sm w-full"
 							rows="3"
 							placeholder="Why this task exists, any relevant constraints..."
 						></textarea>

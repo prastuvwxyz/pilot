@@ -1,0 +1,49 @@
+package components
+
+import "github.com/prastuvwxyz/pilot/internal/store"
+
+templ TaskDetailForm(task store.TaskCard) {
+	<form
+		hx-post={ "/tasks/" + task.Slug + "/edit" }
+		hx-swap="none"
+		class="flex flex-col gap-3"
+	>
+		<div class="flex items-center gap-2 mb-1">
+			<span class="text-xs font-mono text-base-content/40">{ task.Slug }</span>
+			<span class="badge badge-sm badge-ghost capitalize">{ task.Column }</span>
+			if task.Created != "" {
+				<span class="text-xs text-base-content/30 ml-auto">Created { task.Created }</span>
+			}
+		</div>
+		<div class="grid grid-cols-[7rem_1fr] items-center gap-x-4 gap-y-3">
+			<label class="label-text font-medium text-right">Title</label>
+			<input type="text" name="title" value={ task.Title } class="input input-bordered input-sm w-full" required/>
+			<label class="label-text font-medium text-right">Project</label>
+			<input type="text" name="project" value={ task.Project } class="input input-bordered input-sm w-full" placeholder="prastya.com"/>
+			<label class="label-text font-medium text-right">Type</label>
+			<select name="type" class="select select-bordered select-sm w-full">
+				<option value="feature" selected?={ task.Type == "feature" }>feature</option>
+				<option value="bug" selected?={ task.Type == "bug" }>bug</option>
+				<option value="chore" selected?={ task.Type == "chore" }>chore</option>
+				<option value="spike" selected?={ task.Type == "spike" }>spike</option>
+			</select>
+			<label class="label-text font-medium text-right">Priority</label>
+			<select name="priority" class="select select-bordered select-sm w-full">
+				<option value="medium" selected?={ task.Priority == "medium" }>medium</option>
+				<option value="high" selected?={ task.Priority == "high" }>high</option>
+				<option value="low" selected?={ task.Priority == "low" }>low</option>
+			</select>
+			<label class="label-text font-medium text-right self-start pt-2">Context</label>
+			<textarea
+				name="body"
+				class="textarea textarea-bordered textarea-sm w-full font-mono"
+				rows="5"
+				placeholder="Why this task exists, any relevant constraints..."
+			>{ task.Body }</textarea>
+		</div>
+		<div class="modal-action mt-1">
+			<button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('task-detail-modal').close()">Cancel</button>
+			<button type="submit" class="btn btn-primary btn-sm">Save</button>
+		</div>
+	</form>
+}

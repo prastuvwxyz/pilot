@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/prastuvwxyz/pilot/internal/store"
+	"github.com/prastuvwxyz/pilot/web/templates/components"
 	"github.com/prastuvwxyz/pilot/web/templates/pages"
 )
 
@@ -107,6 +108,43 @@ func (h *Handler) DeleteTask(c *gin.Context) {
 		c.Header("X-Git-Error", err.Error())
 	}
 
+	c.Status(http.StatusOK)
+}
+
+func (h *Handler) GetTaskDetail(c *gin.Context) {
+	slug := c.Param("id")
+	card, err := h.tasks.GetTask(slug)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "task not found"})
+		return
+	}
+	components.TaskDetailForm(*card).Render(c.Request.Context(), c.Writer)
+}
+
+func (h *Handler) UpdateTask(c *gin.Context) {
+	slug := c.Param("id")
+	existing, err := h.tasks.GetTask(slug)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "task not found"})
+		return
+	}
+
+	existing.Title = c.PostForm("title")
+	existing.Project = c.PostForm("project")
+	existing.Type = c.PostForm("type")
+	existing.Priority = c.PostForm("priority")
+	existing.Body = c.PostForm("body")
+
+	if err := h.tasks.UpdateTask(*existing); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.git.PullCommitPush(fmt.Sprintf("[pilot] update task: %s", slug)); err != nil {
+		c.Header("X-Git-Error", err.Error())
+	}
+
+	c.Header("HX-Redirect", "/kanban")
 	c.Status(http.StatusOK)
 }
 

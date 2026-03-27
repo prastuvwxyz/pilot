@@ -18,10 +18,12 @@ func NewHandler(cfg *config.Config) *Handler {
 }
 
 func (h *Handler) ShowLogin(c *gin.Context) {
-	// Already logged in → redirect to dashboard
-	if _, err := c.Cookie("sid"); err == nil {
-		c.Redirect(http.StatusFound, "/dashboard")
-		return
+	// Already logged in with a valid token → redirect to dashboard
+	if tokenString, err := c.Cookie("sid"); err == nil {
+		if _, err := middleware.ValidateToken(tokenString, h.cfg.Pilot.JWTSecret); err == nil {
+			c.Redirect(http.StatusFound, "/dashboard")
+			return
+		}
 	}
 	pages.Login("", "").Render(c.Request.Context(), c.Writer)
 }

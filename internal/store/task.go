@@ -235,6 +235,58 @@ func (ts *TaskStore) ApproveTask(slug string) error {
 	return nil
 }
 
+// GetTask finds a task by slug across all columns.
+func (ts *TaskStore) GetTask(slug string) (*TaskCard, error) {
+	for _, col := range Columns {
+		if card, err := ts.readTaskFromFile(col, slug); err == nil {
+			card.Column = col
+			return card, nil
+		}
+		if card, err := ts.readTaskFromFolder(col, slug); err == nil {
+			card.Column = col
+			return card, nil
+		}
+	}
+	return nil, fmt.Errorf("task %s not found", slug)
+}
+
+// UpdateTask rewrites the frontmatter of an existing task file in-place.
+func (ts *TaskStore) UpdateTask(card TaskCard) error {
+	for _, col := range Columns {
+		filePath := filepath.Join(ts.basePath, col, card.Slug+".md")
+		if _, err := os.Stat(filePath); err == nil {
+			return ts.writeTaskFile(filePath, card)
+		}
+		folderPath := filepath.Join(ts.basePath, col, card.Slug)
+		if _, err := os.Stat(folderPath); err == nil {
+			entries, err := os.ReadDir(folderPath)
+			if err != nil {
+				return err
+			}
+			for _, e := range entries {
+				if e.IsDir() || !strings.HasSuffix(e.Name(), ".md") {
+					continue
+				}
+				name := e.Name()
+				if name == "rfc.md" || name == "RFC.md" {
+					continue
+				}
+				return ts.writeTaskFile(filepath.Join(folderPath, name), card)
+			}
+		}
+	}
+	return fmt.Errorf("task %s not found", card.Slug)
+}
+
+func (ts *TaskStore) writeTaskFile(path string, card TaskCard) error {
+	frontmatter, err := yaml.Marshal(card)
+	if err != nil {
+		return fmt.Errorf("failed to marshal frontmatter: %w", err)
+	}
+	content := fmt.Sprintf("---\n%s---\n\n%s", string(frontmatter), card.Body)
+	return os.WriteFile(path, []byte(content), 0644)
+}
+
 // MoveTask moves a task from one column to another.
 // Handles both file-based and folder-based tasks.
 func (ts *TaskStore) MoveTask(slug, fromColumn, toColumn string) error {

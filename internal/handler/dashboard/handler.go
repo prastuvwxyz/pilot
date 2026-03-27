@@ -9,11 +9,12 @@ import (
 )
 
 type Handler struct {
-	tasks *store.TaskStore
+	tasks         *store.TaskStore
+	prasMemoryPath string
 }
 
-func NewHandler(tasks *store.TaskStore) *Handler {
-	return &Handler{tasks: tasks}
+func NewHandler(tasks *store.TaskStore, prasMemoryPath string) *Handler {
+	return &Handler{tasks: tasks, prasMemoryPath: prasMemoryPath}
 }
 
 func (h *Handler) Show(c *gin.Context) {
@@ -22,5 +23,7 @@ func (h *Handler) Show(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	pages.Dashboard(board).Render(c.Request.Context(), c.Writer)
+
+	agents, _ := store.LoadAgents(h.prasMemoryPath)
+	pages.Dashboard(board, agents).Render(c.Request.Context(), c.Writer)
 }

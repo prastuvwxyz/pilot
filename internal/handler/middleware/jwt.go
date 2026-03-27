@@ -66,6 +66,8 @@ func handleUnauthorized(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
+	// Clear invalid cookie so ShowLogin doesn't loop back to /dashboard
+	c.SetCookie("sid", "", -1, "/", "", false, true)
 	c.Redirect(http.StatusFound, "/login")
 	c.Abort()
 }

@@ -10,9 +10,25 @@ func countTasks(board map[string][]store.TaskCard, col string) string {
 	return fmt.Sprintf("%d", len(board[col]))
 }
 
-templ Dashboard(board map[string][]store.TaskCard) {
+func agentDotClass(id string) string {
+	switch id {
+	case "main":
+		return "bg-primary"
+	case "lead-engineer":
+		return "bg-secondary"
+	case "software-engineer":
+		return "bg-info"
+	case "intel":
+		return "bg-warning"
+	default:
+		return "bg-base-content/30"
+	}
+}
+
+templ Dashboard(board map[string][]store.TaskCard, agents []store.AgentInfo) {
 	@layouts.Base("Dashboard", "dashboard") {
 		<h1 class="text-2xl font-bold mb-6">Dashboard</h1>
+		<!-- Task stats -->
 		<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
 			<div class="stat bg-base-100 rounded-box shadow-sm">
 				<div class="stat-title">Backlog</div>
@@ -31,9 +47,10 @@ templ Dashboard(board map[string][]store.TaskCard) {
 				<div class="stat-value text-2xl">{ countTasks(board, "done") }</div>
 			</div>
 		</div>
+		<!-- Alerts -->
 		<div class="flex justify-between items-center mb-4">
 			<h2 class="text-lg font-semibold">Quick Actions</h2>
-			<a href="/kanban" class="btn btn-primary btn-sm">View Kanban</a>
+			<a href="/kanban" class="btn btn-primary btn-sm">View Engineering</a>
 		</div>
 		if len(board["lead-review"]) > 0 {
 			<div class="alert alert-info">
@@ -44,6 +61,37 @@ templ Dashboard(board map[string][]store.TaskCard) {
 		if len(board["blocked"]) > 0 {
 			<div class="alert alert-warning mt-2">
 				<span>{ countTasks(board, "blocked") } task(s) blocked — needs attention</span>
+			</div>
+		}
+		<!-- Agents -->
+		if len(agents) > 0 {
+			<div class="mt-8">
+				<h2 class="text-lg font-semibold mb-4">Agents</h2>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+					for _, agent := range agents {
+						<div class="card bg-base-100 border border-base-300 shadow-sm">
+							<div class="card-body p-4">
+								<div class="flex items-center gap-3">
+									<div class={ "w-2 h-2 rounded-full shrink-0 " + agentDotClass(agent.ID) }></div>
+									<div class="flex-1 min-w-0">
+										<p class="font-semibold text-sm">
+											if agent.Emoji != "" {
+												{ agent.Emoji + " " }
+											}
+											{ agent.Name }
+										</p>
+										if agent.Role != "" {
+											<p class="text-xs text-base-content/50">{ agent.Role }</p>
+										}
+									</div>
+								</div>
+								if agent.Tagline != "" {
+									<p class="text-xs text-base-content/40 italic mt-2 ml-5">{ agent.Tagline }</p>
+								}
+							</div>
+						</div>
+					}
+				</div>
 			</div>
 		}
 	}
