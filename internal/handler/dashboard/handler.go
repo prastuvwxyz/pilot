@@ -10,11 +10,11 @@ import (
 
 type Handler struct {
 	tasks         *store.TaskStore
-	prasMemoryPath string
+	memoryPath string
 }
 
-func NewHandler(tasks *store.TaskStore, prasMemoryPath string) *Handler {
-	return &Handler{tasks: tasks, prasMemoryPath: prasMemoryPath}
+func NewHandler(tasks *store.TaskStore, memoryPath string) *Handler {
+	return &Handler{tasks: tasks, memoryPath: memoryPath}
 }
 
 func (h *Handler) Show(c *gin.Context) {
@@ -24,6 +24,6 @@ func (h *Handler) Show(c *gin.Context) {
 		return
 	}
 
-	agents, _ := store.LoadAgents(h.prasMemoryPath)
+	agents, _ := store.LoadAgents(h.memoryPath)
 	pages.Dashboard(board, agents).Render(c.Request.Context(), c.Writer)
 }

@@ -37,7 +37,7 @@ type PilotConfig struct {
 
 type PathsConfig struct {
 	EngineeringTasks string `mapstructure:"engineering_tasks_path"`
-	PrasMemory       string `mapstructure:"pras_memory_path"`
+	AgentMemoryPath  string `mapstructure:"agent_memory_path"`
 }
 
 type OpenClawConfig struct {
@@ -81,7 +81,7 @@ func Load() (*Config, error) {
 	_ = v.BindEnv("pilot.password", "PILOT_PASSWORD")
 	_ = v.BindEnv("pilot.jwt_secret", "PILOT_JWT_SECRET")
 	_ = v.BindEnv("paths.engineering_tasks_path", "ENGINEERING_TASKS_PATH")
-	_ = v.BindEnv("paths.pras_memory_path", "PRAS_MEMORY_PATH")
+	_ = v.BindEnv("paths.agent_memory_path", "AGENT_MEMORY_PATH")
 	_ = v.BindEnv("openclaw.engineering_lead_channel", "OPENCLAW_ENGINEERING_LEAD_CHANNEL")
 	_ = v.BindEnv("openclaw.engineering_dev_channel", "OPENCLAW_ENGINEERING_DEV_CHANNEL")
 

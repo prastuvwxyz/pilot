@@ -39,14 +39,14 @@ func main() {
 
 	// Stores
 	taskStore := store.NewTaskStore(cfg.Paths.EngineeringTasks)
-	gitStore := store.NewGitStore(cfg.Paths.PrasMemory)
+	gitStore := store.NewGitStore(cfg.Paths.AgentMemoryPath)
 
 	// Handlers
 	authHandler := auth.NewHandler(cfg)
-	dashboardHandler := dashboard.NewHandler(taskStore, cfg.Paths.PrasMemory)
+	dashboardHandler := dashboard.NewHandler(taskStore, cfg.Paths.AgentMemoryPath)
 	kanbanHandler := kanban.NewHandler(taskStore, gitStore)
 	healthHandler := health.NewHandler()
-	agentsHandler := agents.NewHandler(cfg.Paths.PrasMemory)
+	agentsHandler := agents.NewHandler(cfg.Paths.AgentMemoryPath)
 
 	// Router
 	if cfg.IsProduction() {

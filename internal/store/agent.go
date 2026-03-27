@@ -68,16 +68,16 @@ func parseIdentity(path, id string) (AgentInfo, error) {
 }
 
 // agentDir returns the filesystem directory for a given agent ID.
-func agentDir(prasMemoryPath, id string) string {
+func agentDir(memoryPath, id string) string {
 	if id == "main" {
-		return prasMemoryPath
+		return memoryPath
 	}
-	return filepath.Join(prasMemoryPath, "agents", id)
+	return filepath.Join(memoryPath, "agents", id)
 }
 
 // AgentFiles returns the ordered list of standard .md files that exist for an agent.
-func AgentFiles(prasMemoryPath, id string) []string {
-	dir := agentDir(prasMemoryPath, id)
+func AgentFiles(memoryPath, id string) []string {
+	dir := agentDir(memoryPath, id)
 	var files []string
 	for _, name := range agentFileOrder {
 		if _, err := os.Stat(filepath.Join(dir, name)); err == nil {
@@ -88,8 +88,8 @@ func AgentFiles(prasMemoryPath, id string) []string {
 }
 
 // ReadAgentFile reads the content of a named file for an agent.
-func ReadAgentFile(prasMemoryPath, id, filename string) (string, error) {
-	path := filepath.Join(agentDir(prasMemoryPath, id), filepath.Base(filename))
+func ReadAgentFile(memoryPath, id, filename string) (string, error) {
+	path := filepath.Join(agentDir(memoryPath, id), filepath.Base(filename))
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return "", err
@@ -98,18 +98,18 @@ func ReadAgentFile(prasMemoryPath, id, filename string) (string, error) {
 }
 
 // WriteAgentFile overwrites the content of a named file for an agent.
-func WriteAgentFile(prasMemoryPath, id, filename, content string) error {
-	path := filepath.Join(agentDir(prasMemoryPath, id), filepath.Base(filename))
+func WriteAgentFile(memoryPath, id, filename, content string) error {
+	path := filepath.Join(agentDir(memoryPath, id), filepath.Base(filename))
 	return os.WriteFile(path, []byte(content), 0644)
 }
 
 // LoadAgents reads the main agent (root IDENTITY.md) and all sub-agents
 // from the agents/ subdirectory.
-func LoadAgents(prasMemoryPath string) ([]AgentInfo, error) {
+func LoadAgents(memoryPath string) ([]AgentInfo, error) {
 	var agents []AgentInfo
 
 	// Main agent (root)
-	rootIdentity := filepath.Join(prasMemoryPath, "IDENTITY.md")
+	rootIdentity := filepath.Join(memoryPath, "IDENTITY.md")
 	if _, err := os.Stat(rootIdentity); err == nil {
 		if info, err := parseIdentity(rootIdentity, "main"); err == nil {
 			agents = append(agents, info)
@@ -117,7 +117,7 @@ func LoadAgents(prasMemoryPath string) ([]AgentInfo, error) {
 	}
 
 	// Sub-agents in agents/
-	agentsDir := filepath.Join(prasMemoryPath, "agents")
+	agentsDir := filepath.Join(memoryPath, "agents")
 	entries, err := os.ReadDir(agentsDir)
 	if err != nil {
 		return agents, nil // agents/ missing is non-fatal
@@ -138,12 +138,12 @@ func LoadAgents(prasMemoryPath string) ([]AgentInfo, error) {
 }
 
 // GetAgent returns a single AgentInfo by ID.
-func GetAgent(prasMemoryPath, id string) (AgentInfo, error) {
+func GetAgent(memoryPath, id string) (AgentInfo, error) {
 	var identityPath string
 	if id == "main" {
-		identityPath = filepath.Join(prasMemoryPath, "IDENTITY.md")
+		identityPath = filepath.Join(memoryPath, "IDENTITY.md")
 	} else {
-		identityPath = filepath.Join(prasMemoryPath, "agents", id, "IDENTITY.md")
+		identityPath = filepath.Join(memoryPath, "agents", id, "IDENTITY.md")
 	}
 	return parseIdentity(identityPath, id)
 }

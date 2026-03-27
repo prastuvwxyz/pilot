@@ -14,7 +14,7 @@ id: TASK-001
 title: Test Task
 type: feature
 priority: high
-project: prastya.com
+project: my-project
 status: backlog
 created: 2026-03-25
 ---

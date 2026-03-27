@@ -19,7 +19,7 @@ templ TaskDetailForm(task store.TaskCard) {
 			<label class="label-text font-medium text-right">Title</label>
 			<input type="text" name="title" value={ task.Title } class="input input-bordered input-sm w-full" required/>
 			<label class="label-text font-medium text-right">Project</label>
-			<input type="text" name="project" value={ task.Project } class="input input-bordered input-sm w-full" placeholder="prastya.com"/>
+			<input type="text" name="project" value={ task.Project } class="input input-bordered input-sm w-full" placeholder="my-project"/>
 			<label class="label-text font-medium text-right">Type</label>
 			<select name="type" class="select select-bordered select-sm w-full">
 				<option value="feature" selected?={ task.Type == "feature" }>feature</option>

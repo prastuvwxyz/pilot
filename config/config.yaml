@@ -9,4 +9,4 @@ pilot:
   jwt_expiry: 24h
 
 engineering_tasks_path: /home/openclaw/pras-memory/engineering-tasks
-pras_memory_path: /home/openclaw/pras-memory
+agent_memory_path: /home/openclaw/pras-memory
